@@ -2,9 +2,9 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, stable ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, stable ]
   workflow_dispatch:
 
 jobs:
@@ -24,8 +24,21 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v2
 
+    - name: Download and extract legacy tools (Linux)
+      run: |
+        export ANDROID_HOME=/usr/local/lib/android/sdk
+        cd $ANDROID_HOME
+        rm -rf tools tools_temp tools.zip
+        curl -L -o tools.zip https://dl.google.com/android/repository/tools_r22-linux.zip
+        unzip -o tools.zip
+        mkdir -p tools/ant
+        cp -r tools/* tools/ant/
+        rm -rf tools
+        rm -f tools.zip
+
     - name: Create local.properties
-      run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+      run: |
+        echo "sdk.dir=$ANDROID_HOME" > local.properties
 
     - name: Install Ant
       run: |
